@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Employees</title>
+	<link rel="stylesheet" href="/styles.css">
+	<link href="/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+	<nav>
+        <h4>HR Management</h4>
+        <ul>
+            <li><a href="/employees">Employees</a></li>
+            <li><a href="/leave-management">Leave Management</a></li>
+            <li><a href="/payroll">Payroll</a></li>
+            <li><a class="btn btn-danger" href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+
+	{{!-- Body --}}
+	<br><br>
+	<div class="container mt-4">
+		<h2>Employees Management</h2>
+
+		<a href="/addEmployee" class="btn btn-success">Add Employee</a>
+
+		<table class="table table-bordered">
+			<thead>
+				<tr>
+					<th>Full Name</th>
+					<th>Email</th>
+					<th>Departement</th>
+					<th>Suspended</th>
+					<th>Manage</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each result}}
+				<tr>
+					<td>{{nom}} {{prenom}}</td>
+					<td>{{email}}</td>
+					<td>{{dep_nom}}</td>
+					<td style="color: {{#if suspended}}red{{else}}black{{/if}};">
+						{{#if suspended}}true{{else}}false{{/if}}
+					</td>
+					<td>
+						<a href="/viewProfile/{{e_id}}" class="btn btn-success">View Profile</a>
+						<a href="/edit?id={{e_id}}" class="btn btn-secondary">Edit Profile</a>
+						<button class="btn btn-danger suspend-btn" data-id="{{e_id}}" data-suspended="{{suspended}}">
+							{{#if suspended}}Unsuspend{{else}}Suspend{{/if}}
+						</button>
+						<button class="btn btn-warning delete-btn" data-id="{{e_id}}">Delete</button>
+					</td>
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+
+	</div>
+	<script>
+		// Attach click event to suspend buttons
+		document.addEventListener("DOMContentLoaded", () => {
+			const suspendButtons = document.querySelectorAll(".suspend-btn");
+
+			suspendButtons.forEach((button) => {
+				button.addEventListener("click", (event) => {
+					const employeeId = button.dataset.id;
+					const suspendStatus = button.dataset.suspended === "1" ? true : false;
+
+					const action = suspendStatus ? "unsuspend" : "suspend";
+					const confirmMessage = `Are you sure you want to ${action} this employee?`;
+
+					if (confirm(confirmMessage)) {
+						// Send a request to suspend/unsuspend the employee
+						fetch(`/suspendEmployee`, {
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({ e_id: employeeId, suspend: !suspendStatus }),
+						})
+							.then((response) => response.json())
+							.then((data) => {
+								if (data.success) {
+									alert(`Employee has been ${action}ed successfully.`);
+									location.reload(); // Reload the page to reflect changes
+								} else {
+									alert(`Failed to ${action} employee: ${data.message}`);
+								}
+							})
+							.catch((error) => {
+								console.error("Error:", error);
+								alert(`An error occurred while trying to ${action} the employee.`);
+							});
+					}
+
+
+				});
+			});
+
+			const deleteButtons = document.querySelectorAll(".delete-btn");
+
+			deleteButtons.forEach((button) => {
+				button.addEventListener("click", (event) => {
+					const employeeId = button.dataset.id;
+
+					if (confirm("Are you sure you want to delete this employee?")) {
+						// Send a request to delete the employee
+						fetch(`/deleteEmployee`, {
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({ e_id: employeeId }),
+						})
+							.then((response) => response.json())
+							.then((data) => {
+								if (data.success) {
+									alert("Employee deleted successfully.");
+									button.closest("tr").remove(); // Remove the row from the table
+								} else {
+									alert(`Failed to delete employee: ${data.message}`);
+								}
+							})
+							.catch((error) => {
+								console.error("Error:", error);
+								alert("An error occurred while trying to delete the employee.");
+							});
+					}
+				});
+			});
+		});
+
+	</script>
+
+
+
+</body>
+
+</html>

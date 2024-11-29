@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Employee</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link href="/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <nav>
+        <h4>HR Management</h4>
+        <ul>
+            <li><a href="/employees">Employees</a></li>
+            <li><a href="/leave-management">Leave Management</a></li>
+            <li><a href="/payroll">Payroll</a></li>
+            <li><a class="btn btn-danger" href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+
+    <!-- Body -->
+    <div class="container mt-4">
+        <div class="card" style="width: 24rem; margin: 0 auto;">
+            <div class="card-header">Add Employee</div>
+            <div class="card-body">
+                <form action="/addEmployee" method="POST">
+                    <div class="mb-3">
+                        <label for="nom" class="form-label">First Name</label>
+                        <input type="text" class="form-control" id="nom" name="nom" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="prenom" class="form-label">Last Name</label>
+                        <input type="text" class="form-control" id="prenom" name="prenom" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="department" class="form-label">Department</label>
+                        <select class="form-select" id="department" name="d_id" required>
+                            {{#each departments}}
+                            <option value="{{d_id}}">{{dep_nom}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="zone_id" class="form-label">Zone</label>
+                        <select class="form-select" id="zone_id" name="zone_id" required>
+                            {{#each zones}}
+                            <option value="{{zone_id}}">{{zone_name}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="experience_years" class="form-label">Experience Years</label>
+                        <input type="number" class="form-control" id="experience_years" name="experience_years" min="0" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="base_salary" class="form-label">Base Salary</label>
+                        <input type="number" step="0.01" class="form-control" id="base_salary" name="base_salary" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <a href="/employees" class="btn btn-success btn-md mt-3">Back</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

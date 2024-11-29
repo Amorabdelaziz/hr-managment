@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leave Management</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/bootstrap.min.css">
+</head>
+
+<body>
+    <nav>
+        <h4>HR Management</h4>
+        <ul>
+            <li><a href="/employees">Employees</a></li>
+            <li><a href="/leave-management">Leave Management</a></li>
+            <li><a href="/payroll">Payroll</a></li>
+            <li><a class="btn btn-danger" href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+
+    <div class="container mt-4">
+        <h2>Leave Management</h2>
+
+        <!-- Request Leave Button -->
+        <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#requestLeaveModal">Request
+            Leave</button>
+
+        <!-- Leave Table -->
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Leave Type</th>
+                    <th>Leave Reason</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each leaves}}
+                <tr>
+                    <td>{{employee_name}}</td>
+                    <td>{{type_name}}</td>
+                    <td>{{reason}}</td>
+                    <td>{{formatted_start_date}}</td>
+                    <td>
+                        {{formatted_end_date}} <br>
+                        <span style="font-weight: bold;">{{days_left}}</span>
+                    </td>
+                    <td>{{status}}</td>
+                    <td>
+                        {{#if (eq status "pending")}}
+                        <button class="btn btn-primary approve-btn" data-id="{{id}}">Approve</button>
+                        <button class="btn btn-danger reject-btn" data-id="{{id}}">Reject</button>
+                        {{/if}}
+                    </td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Request Leave Modal -->
+    <div class="modal fade" id="requestLeaveModal" tabindex="-1" aria-labelledby="requestLeaveLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="requestLeaveForm">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="requestLeaveLabel">Request Leave</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="employeeSelect" class="form-label">Employee</label>
+                            <select id="employeeSelect" class="form-select" name="employee_id" required>
+                                {{#each employees}}
+                                <option value="{{e_id}}">{{nom}} {{prenom}}</option>
+                                {{/each}}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="leaveType" class="form-label">Leave Type</label>
+                            <select id="leaveType" class="form-select" name="leave_type_id" required>
+                                {{#each leaveTypes}}
+                                <option value="{{id}}">{{type_name}}</option>
+                                {{/each}}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="startDate" class="form-label">Start Date</label>
+                            <input type="date" id="startDate" class="form-control" name="start_date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="endDate" class="form-label">End Date</label>
+                            <input type="date" id="endDate" class="form-control" name="end_date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="reason" class="form-label">Reason</label>
+                            <textarea id="reason" class="form-control" name="reason" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="/bootstrap.bundle.min.js"></script>
+    <script>
+
+
+        document.addEventListener("DOMContentLoaded", () => {
+            // Handle leave request form submission
+            const leaveRequestForm = document.getElementById("requestLeaveForm");
+
+            leaveRequestForm.addEventListener("submit", (event) => {
+                event.preventDefault(); // Prevent form from submitting the traditional way
+
+                const formData = new FormData(leaveRequestForm);
+
+                // Convert form data to JSON
+                const data = {};
+                formData.forEach((value, key) => {
+                    data[key] = value;
+                });
+
+                // Send POST request to submit leave request
+                fetch("/leave-management/request", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(data),
+                })
+                    .then((response) => response.json())
+                    .then((result) => {
+                        if (result.success) {
+                            alert("Leave request submitted successfully.");
+                            location.reload(); // Reload page to reflect changes
+                        } else {
+                            alert(`Error: ${result.message}`);
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Error:", error);
+                        alert("An error occurred while submitting the leave request.");
+                    });
+            });
+            // Approve and Reject buttons
+            const approveButtons = document.querySelectorAll(".approve-btn");
+            const rejectButtons = document.querySelectorAll(".reject-btn");
+
+            approveButtons.forEach((button) => {
+                button.addEventListener("click", () => {
+                    const leaveId = button.dataset.id;
+                    handleLeaveAction(leaveId, "approved");
+                });
+            });
+
+            rejectButtons.forEach((button) => {
+                button.addEventListener("click", () => {
+                    const leaveId = button.dataset.id;
+                    handleLeaveAction(leaveId, "rejected");
+                });
+            });
+
+            // Handle leave action (approve/reject)
+            function handleLeaveAction(leaveId, status) {
+                fetch(`/leave-management/update-status`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id: leaveId, status }),
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data.success) {
+                            alert(`Leave ${status} successfully.`);
+                            location.reload();
+                        } else {
+                            alert(`Failed to update leave status: ${data.message}`);
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Error:", error);
+                        alert("An error occurred.");
+                    });
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payroll List</title>
+    <link href="/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <nav>
+        <h4>HR Management</h4>
+        <ul>
+            <li><a href="/employees">Employees</a></li>
+            <li><a href="/leave-management">Leave Management</a></li>
+            <li><a href="/payroll">Payroll</a></li>
+            <li><a class="btn btn-danger" href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+    <div class="container mt-4">
+        <h1>Employee Payroll</h1>
+        <table class="table table-bordered mt-4">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Base Salary (DZD)</th>
+                    <th>Zone Bonus (DZD)</th>
+                    <th>Experience Bonus (DZD)</th>
+                    <th>Total Deductions (DZD)</th>
+                    <th>Total Salary (DZD)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each employeesWithSalary}}
+                <tr>
+                    <td>{{name}}</td>
+                    <td>{{baseSalary}}</td>
+                    <td>{{zoneBonus}}</td>
+                    <td>{{experienceBonus}}</td>
+                    <td>{{totalDeductions}}</td>
+                    <td>{{totalSalary}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>
