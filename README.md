@@ -8,4 +8,4 @@
 * `npm install` : Install project dependencies
 * `npm run start`: Start app
 * `npm run dev`: Start app in development mode using nodemon
-* `npm install nodemon -g`: If you don't have nodemon installed
+* `npm install -g nodemon`: If you don't have nodemon installed
